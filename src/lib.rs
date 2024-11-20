@@ -10,10 +10,13 @@ pub use db_structs::*;
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use crate::*;
 
     #[test]
     fn bet_demo() -> Result<(), BetError> {
+        // removes the test DB if it exists
+        let _ = fs::remove_file("bets.db");
         // variables for readability
         let server_id = 1;
         let bet_id = 1;
@@ -23,6 +26,8 @@ mod tests {
         // Create 3 accounts on server 1 with 100 starting coins
         bets.create_account(server_id, alice, 100)?;
         bets.create_account(server_id, bob, 100)?;
+        bets.create_account(server_id, charlie, 100)?;
+        // creating Charlie's account twice shouldn't crash
         bets.create_account(server_id, charlie, 100)?;
         // Alice creates a bet with 2 outcomes
         bets.create_bet(

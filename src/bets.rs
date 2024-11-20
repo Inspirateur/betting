@@ -72,10 +72,11 @@ impl Bets {
         })
     }
 
+    /// Creates an account if it doesn't already exist (will do nothing if it does)
     pub fn create_account(&self, server: u64, user: u64, amount: u64) -> Result<(), BetError> {
         let conn = Connection::open(&self.db_path)?;
         conn.execute(
-            "INSERT 
+            "INSERT OR IGNORE
             INTO Account (server, user, balance) 
             VALUES (?1, ?2, ?3)",
             [server, user, amount],
@@ -83,6 +84,7 @@ impl Bets {
         Ok(())
     }
 
+    /// Will delete every bet from server and set every balance to the same amount
     pub fn reset(&self, server: u64, amount: u64) -> Result<(), BetError> {
         let mut conn = Connection::open(&self.db_path)?;
         let tx = conn.transaction()?;

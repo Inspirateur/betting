@@ -103,16 +103,6 @@ impl Bets {
         Ok(tx.commit()?)
     }
 
-    pub fn global_income(&self, income: u64) -> Result<(), BetError> {
-        let conn = Connection::open(&self.db_path)?;
-        conn.execute(
-            "UPDATE Account
-            SET balance = balance + ?1", 
-            [income]
-        )?;
-        Ok(())
-    }
-
     pub fn income(&self, server: u64, income: u64) -> Result<Vec<AccountUpdate>, BetError> {
         let conn = Connection::open(&self.db_path)?;
         let mut stmt = conn.prepare(
@@ -122,7 +112,7 @@ impl Bets {
             RETURNING server, user, balance"
         ).unwrap();
         let mut account_updates = Vec::new();
-        let mut rows = stmt.query([server, income])?;
+        let mut rows = stmt.query([income, server])?;
         while let Some(row) = rows.next()? {
             account_updates.push(AccountUpdate {
                 server: row.get::<usize, u64>(0)?,

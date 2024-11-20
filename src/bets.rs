@@ -410,8 +410,19 @@ impl Bets {
             .collect())
     }
 
-    pub fn get_info(&self, bet_uuid: u64) -> Result<BetInfo, BetError> {
+    pub fn bet_info(&self, bet_uuid: u64) -> Result<BetInfo, BetError> {
         let conn = Connection::open(&self.db_path)?;
         conn.bet_info(bet_uuid)
+    }
+
+    pub fn bet_participants(&self, bet_uuid: u64) -> Result<Vec<u64>, BetError> {
+        let conn = Connection::open(&self.db_path)?;
+        let mut stmt = conn.prepare(
+            "SELECT user
+            FROM Wager
+            WHERE bet = ?1"
+        ).unwrap();
+        let res = stmt.query_map([bet_uuid], |row| row.get::<usize, u64>(0))?.collect::<Result<Vec<_>>>()?;
+        Ok(res)
     }
 }
